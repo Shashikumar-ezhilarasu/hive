@@ -1,0 +1,305 @@
+{
+  "agent": {
+    "id": "startup_opportunity_scanner",
+    "name": "Startup Opportunity Scanner",
+    "version": "1.0.0",
+    "description": "Scans market signals, analyzes trends, generates startup ideas, and scores opportunities to surface the top 5 most promising startup opportunities in any given domain."
+  },
+  "graph": {
+    "id": "startup-opportunity-scanner-graph",
+    "goal_id": "startup-opportunity-scan",
+    "version": "1.0.0",
+    "entry_node": "market-signals",
+    "entry_points": {
+      "start": "market-signals"
+    },
+    "pause_nodes": [],
+    "terminal_nodes": [
+      "scoring"
+    ],
+    "nodes": [
+      {
+        "id": "market-signals",
+        "name": "Market Signal Detection",
+        "description": "Scan web sources for market signals: emerging tech, user complaints, underserved markets, regulatory changes",
+        "node_type": "event_loop",
+        "input_keys": [
+          "research_brief"
+        ],
+        "output_keys": [
+          "market_signals",
+          "signal_summary"
+        ],
+        "nullable_output_keys": [],
+        "input_schema": {},
+        "output_schema": {},
+        "system_prompt": null,
+        "tools": [
+          "web_search",
+          "web_scrape",
+          "save_data",
+          "load_data",
+          "list_data_files",
+          "pinecone_query_vectors",
+          "pinecone_upsert_vectors"
+        ],
+        "model": null,
+        "function": null,
+        "routes": {},
+        "max_retries": 3,
+        "retry_on": [],
+        "max_node_visits": 1,
+        "output_model": null,
+        "max_validation_retries": 2,
+        "client_facing": false
+      },
+      {
+        "id": "trend-analysis",
+        "name": "Trend Analysis",
+        "description": "Identify growing sectors, funding patterns, and technological shifts in the target domain",
+        "node_type": "event_loop",
+        "input_keys": [
+          "research_brief",
+          "market_signals",
+          "signal_summary"
+        ],
+        "output_keys": [
+          "trends",
+          "trend_summary"
+        ],
+        "nullable_output_keys": [],
+        "input_schema": {},
+        "output_schema": {},
+        "system_prompt": null,
+        "tools": [
+          "web_search",
+          "web_scrape",
+          "save_data",
+          "load_data",
+          "list_data_files",
+          "pinecone_query_vectors",
+          "pinecone_upsert_vectors"
+        ],
+        "model": null,
+        "function": null,
+        "routes": {},
+        "max_retries": 3,
+        "retry_on": [],
+        "max_node_visits": 1,
+        "output_model": null,
+        "max_validation_retries": 2,
+        "client_facing": false
+      },
+      {
+        "id": "opportunity-generation",
+        "name": "Opportunity Generation",
+        "description": "Synthesize market signals and trends into concrete startup opportunity proposals",
+        "node_type": "event_loop",
+        "input_keys": [
+          "research_brief",
+          "market_signals",
+          "signal_summary",
+          "trends",
+          "trend_summary"
+        ],
+        "output_keys": [
+          "opportunities",
+          "opportunity_count"
+        ],
+        "nullable_output_keys": [],
+        "input_schema": {},
+        "output_schema": {},
+        "system_prompt": null,
+        "tools": [
+          "save_data",
+          "load_data",
+          "list_data_files",
+          "pinecone_query_vectors"
+        ],
+        "model": null,
+        "function": null,
+        "routes": {},
+        "max_retries": 3,
+        "retry_on": [],
+        "max_node_visits": 1,
+        "output_model": null,
+        "max_validation_retries": 2,
+        "client_facing": false
+      },
+      {
+        "id": "scoring",
+        "name": "Opportunity Scoring & Report",
+        "description": "Score opportunities on market size, feasibility, competition, and defensibility, then deliver a ranked top-5 report",
+        "node_type": "event_loop",
+        "input_keys": [
+          "research_brief",
+          "opportunities",
+          "opportunity_count",
+          "market_signals",
+          "trends"
+        ],
+        "output_keys": [
+          "top_opportunities",
+          "delivery_status"
+        ],
+        "nullable_output_keys": [],
+        "input_schema": {},
+        "output_schema": {},
+        "system_prompt": null,
+        "tools": [
+          "save_data",
+          "append_data",
+          "load_data",
+          "list_data_files",
+          "serve_file_to_user",
+          "pinecone_upsert_vectors"
+        ],
+        "model": null,
+        "function": null,
+        "routes": {},
+        "max_retries": 3,
+        "retry_on": [],
+        "max_node_visits": 1,
+        "output_model": null,
+        "max_validation_retries": 2,
+        "client_facing": true
+      }
+    ],
+    "edges": [
+      {
+        "id": "signals-to-trends",
+        "source": "market-signals",
+        "target": "trend-analysis",
+        "condition": "on_success",
+        "condition_expr": null,
+        "priority": 1,
+        "input_mapping": {}
+      },
+      {
+        "id": "trends-to-opportunities",
+        "source": "trend-analysis",
+        "target": "opportunity-generation",
+        "condition": "on_success",
+        "condition_expr": null,
+        "priority": 1,
+        "input_mapping": {}
+      },
+      {
+        "id": "opportunities-to-scoring",
+        "source": "opportunity-generation",
+        "target": "scoring",
+        "condition": "on_success",
+        "condition_expr": null,
+        "priority": 1,
+        "input_mapping": {}
+      }
+    ],
+    "max_steps": 100,
+    "max_retries_per_node": 3,
+    "description": "Scans market signals, analyzes trends, generates startup ideas, and scores opportunities to surface the top 5 most promising startup opportunities in any given domain.",
+    "created_at": "2026-03-12T00:00:00.000000"
+  },
+  "goal": {
+    "id": "startup-opportunity-scan",
+    "name": "Startup Opportunity Scan",
+    "description": "Scan market signals across a given domain, analyze trends, generate startup opportunity proposals, and score them to surface the top 5 most promising ideas with detailed justification.",
+    "status": "draft",
+    "success_criteria": [
+      {
+        "id": "sc-signal-diversity",
+        "description": "Gather signals from at least 3 of 4 categories (technology, complaints, underserved, regulatory)",
+        "metric": "signal_categories",
+        "target": ">=3",
+        "weight": 0.20,
+        "met": false
+      },
+      {
+        "id": "sc-trend-coverage",
+        "description": "Identify trends across sector growth, funding, and technology shifts",
+        "metric": "trend_categories",
+        "target": ">=2",
+        "weight": 0.20,
+        "met": false
+      },
+      {
+        "id": "sc-opportunity-count",
+        "description": "Generate at least 8 concrete startup opportunities",
+        "metric": "opportunity_count",
+        "target": ">=8",
+        "weight": 0.20,
+        "met": false
+      },
+      {
+        "id": "sc-scoring-completeness",
+        "description": "Score all opportunities on 4 criteria and rank the top 5",
+        "metric": "top_opportunities_count",
+        "target": ">=5",
+        "weight": 0.20,
+        "met": false
+      },
+      {
+        "id": "sc-report-delivered",
+        "description": "Deliver a formatted HTML report with scored and ranked opportunities",
+        "metric": "report_delivered",
+        "target": "true",
+        "weight": 0.20,
+        "met": false
+      }
+    ],
+    "constraints": [
+      {
+        "id": "c-no-fabrication",
+        "description": "All market signals and trends must come from actual web sources, not fabricated data",
+        "constraint_type": "hard",
+        "category": "quality",
+        "check": ""
+      },
+      {
+        "id": "c-source-attribution",
+        "description": "Every signal and trend must cite its source URL",
+        "constraint_type": "hard",
+        "category": "quality",
+        "check": ""
+      },
+      {
+        "id": "c-scoring-transparency",
+        "description": "Every scoring decision must include a brief justification",
+        "constraint_type": "hard",
+        "category": "quality",
+        "check": ""
+      },
+      {
+        "id": "c-pinecone-optional",
+        "description": "Agent must function fully without Pinecone credentials configured",
+        "constraint_type": "hard",
+        "category": "compatibility",
+        "check": ""
+      }
+    ],
+    "context": {},
+    "required_capabilities": [],
+    "input_schema": {},
+    "output_schema": {},
+    "version": "1.0.0",
+    "parent_version": null,
+    "evolution_reason": null,
+    "created_at": "2026-03-12 00:00:00.000000",
+    "updated_at": "2026-03-12 00:00:00.000000"
+  },
+  "required_tools": [
+    "web_search",
+    "web_scrape",
+    "save_data",
+    "append_data",
+    "load_data",
+    "list_data_files",
+    "serve_file_to_user",
+    "pinecone_query_vectors",
+    "pinecone_upsert_vectors"
+  ],
+  "metadata": {
+    "created_at": "2026-03-12T00:00:00.000000",
+    "node_count": 4,
+    "edge_count": 3
+  }
+}
